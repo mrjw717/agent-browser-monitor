@@ -1,6 +1,21 @@
 # Agent Browser Monitor
 
-A cross-platform Tauri desktop utility for finding and stopping stale `agent-browser` and Playwright sessions.
+**Know exactly which local browser automation is still alive.**
+
+A free, local-first desktop utility for finding and stopping stale `agent-browser`, Playwright, and Vercel preview-check browser sessions—without touching your ordinary Chrome windows.
+
+![Agent Browser Monitor showing several live disposable browser sessions](assets/live-session-monitor.png)
+
+## Why this exists
+
+Browser automation is brilliant until a completed preview check, Playwright run, or agent session leaves headless Chrome processes behind. Those processes can quietly keep using CPU, RAM, swap, and battery long after the task appears done.
+
+Agent Browser Monitor gives you one fast, deliberate control surface:
+
+- See scoped automation sessions, their process trees, CPU, RAM, parent PID, age, and redacted command line.
+- Inspect Vercel preview-validation work before ending it.
+- Terminate only the selected verified automation tree—never all Chrome, and never a normal visible browser window.
+- Refresh automatically every three seconds. No account, API key, cloud service, or telemetry required.
 
 ## Download and install an RC build
 
