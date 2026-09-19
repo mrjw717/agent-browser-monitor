@@ -90,12 +90,12 @@ function render() {
 
   app.innerHTML = `
     <main>
-      <div class="titlebar" data-drag-region>
-        <div class="app-mark" data-drag-region><span></span>Agent Browser Monitor</div>
+      <div class="titlebar" data-tauri-drag-region>
+        <div class="app-mark" data-tauri-drag-region><span></span>Agent Browser Monitor</div>
         <div class="window-controls">
-          <button data-window="minimize" aria-label="Minimize">−</button>
-          <button data-window="maximize" aria-label="Maximize">□</button>
-          <button class="window-close" data-window="close" aria-label="Close">×</button>
+          <button data-window="minimize" data-tauri-drag-region="false" aria-label="Minimize">−</button>
+          <button data-window="maximize" data-tauri-drag-region="false" aria-label="Maximize">□</button>
+          <button class="window-close" data-window="close" data-tauri-drag-region="false" aria-label="Close">×</button>
         </div>
       </div>
       <header>
@@ -121,7 +121,6 @@ function render() {
     if (action === "maximize") void window.toggleMaximize();
     if (action === "close") void window.close();
   }));
-  document.querySelector<HTMLElement>("[data-drag-region]")?.addEventListener("mousedown", () => void getCurrentWindow().startDragging());
   document.querySelectorAll<HTMLButtonElement>("[data-expand]").forEach((button) => button.addEventListener("click", () => {
     const id = button.dataset.expand!;
     expanded.has(id) ? expanded.delete(id) : expanded.add(id);
