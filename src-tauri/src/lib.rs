@@ -1,4 +1,5 @@
 use serde::Serialize;
+use tauri::Manager;
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 use std::process::Command;
 use std::{
@@ -511,6 +512,11 @@ pub fn run() {
         .manage(AppState {
             cpu: Mutex::new(None),
             samples: Mutex::new(HashMap::new()),
+        })
+        .setup(|app| {
+            let window = app.get_webview_window("main").expect("main window");
+            window.set_icon(tauri::include_image!("icons/128x128.png"))?;
+            Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_snapshot, terminate_session])
         .run(tauri::generate_context!())

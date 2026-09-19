@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import appIcon from "./app-icon.png";
 import "./style.css";
 
 type ProcessInfo = {
@@ -91,7 +92,7 @@ function render() {
   app.innerHTML = `
     <main>
       <div class="titlebar" data-tauri-drag-region>
-        <div class="app-mark" data-tauri-drag-region><span></span>Agent Browser Monitor</div>
+        <div class="app-mark" data-tauri-drag-region><img src="${appIcon}" alt="" />Agent Browser Monitor</div>
         <div class="window-controls">
           <button data-window="minimize" data-tauri-drag-region="false" aria-label="Minimize">−</button>
           <button data-window="maximize" data-tauri-drag-region="false" aria-label="Maximize">□</button>

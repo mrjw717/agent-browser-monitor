@@ -4,7 +4,7 @@ body { margin: 0; min-width: 660px; height: 100vh; overflow: hidden; background:
 button { font: inherit; cursor: pointer; }
 main { width: min(1120px, 100%); height: 100vh; margin: 0 auto; padding: 0 38px 26px; display: flex; flex-direction: column; overflow: hidden; }
 .titlebar { height: 34px; margin: 0 -38px 28px; padding-left: 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #25363b; background: #10191dcc; flex: 0 0 auto; user-select: none; }
-.app-mark { display: flex; align-items: center; gap: 8px; color: #b8c9ce; font-size: .72rem; font-weight: 800; letter-spacing: .04em; }.app-mark span { width: 9px; height: 9px; border-radius: 50%; background: #62d5c7; box-shadow: 0 0 12px #62d5c788; }
+.app-mark { display: flex; align-items: center; gap: 8px; color: #b8c9ce; font-size: .72rem; font-weight: 800; letter-spacing: .04em; }.app-mark img { width: 18px; height: 18px; border-radius: 5px; }
 .window-controls { display: flex; align-self: stretch; }.window-controls button { width: 42px; color: #b7c9ce; background: transparent; border: 0; font-size: 1rem; }.window-controls button:hover { background: #26383e; }.window-controls .window-close:hover { background: #b94747; color: white; }
 header { display: flex; justify-content: space-between; gap: 30px; align-items: start; }
 .eyebrow { color: #60d0c2; font-size: .7rem; font-weight: 800; letter-spacing: .14em; margin: 0 0 8px; }
