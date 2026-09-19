@@ -4,6 +4,8 @@
 
 A free, local-first desktop utility for finding and stopping stale `agent-browser`, Playwright, and Vercel preview-check browser sessions—without touching your ordinary Chrome windows.
 
+![Agent Browser Monitor showing four live local automation sessions](assets/live-session-monitor.png)
+
 ![Agent Browser Monitor showing several live disposable browser sessions](assets/live-session-monitor.png)
 
 ## Why this exists
