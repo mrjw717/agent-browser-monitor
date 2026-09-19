@@ -4,6 +4,6 @@
   "version": "0.1.0-rc.2",
   "identifier": "local.josh.agentbrowsermonitor",
   "build": { "frontendDist": "../dist", "devUrl": "http://localhost:1420", "beforeDevCommand": "npm run dev -- --port 1420", "beforeBuildCommand": "npm run build" },
-  "app": { "windows": [{ "title": "Agent Browser Monitor", "width": 1080, "height": 720, "minWidth": 660, "minHeight": 500 }], "security": { "csp": null } },
+  "app": { "windows": [{ "title": "Agent Browser Monitor", "width": 1080, "height": 720, "minWidth": 660, "minHeight": 500, "decorations": false }], "security": { "csp": null } },
   "bundle": { "active": true, "targets": "all", "icon": ["icons/icon.png"] }
 }

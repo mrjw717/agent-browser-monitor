@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import "./style.css";
 
 type ProcessInfo = {
@@ -8,6 +9,7 @@ type ProcessInfo = {
   state: string;
   cpu_percent: number;
   memory_mib: number;
+  active_seconds: number;
   elapsed_seconds: number;
   command: string;
 };
@@ -21,6 +23,7 @@ type Session = {
   processes: ProcessInfo[];
   cpu_percent: number;
   memory_mib: number;
+  active_seconds: number;
 };
 
 type Snapshot = {
@@ -46,6 +49,7 @@ const formatAge = (seconds: number) => {
 };
 
 const num = (value: number, digits = 0) => value.toLocaleString(undefined, { maximumFractionDigits: digits });
+const memoryGb = (mib: number) => `${num(mib / 1024, mib >= 1024 ? 1 : 2)} GB`;
 
 function render() {
   if (!snapshot) {
@@ -74,8 +78,9 @@ function render() {
             <button class="expander" data-expand="${session.id}" aria-label="${open ? "Hide" : "Show"} process details">${open ? "−" : "+"}</button>
             <div class="session-title"><strong>${kind}</strong><span>${escapeHtml(profile)}</span></div>
             <div class="metric"><b>${num(session.cpu_percent, 1)}%</b><span>CPU</span></div>
-            <div class="metric"><b>${num(session.memory_mib, 1)}</b><span>MiB RAM</span></div>
+            <div class="metric"><b>${memoryGb(session.memory_mib)}</b><span>RAM</span></div>
             <div class="metric"><b>${session.processes.length}</b><span>processes</span></div>
+            <div class="metric"><b>${formatAge(session.active_seconds)}</b><span>active</span></div>
             <button class="terminate" data-terminate="${session.id}">Terminate…</button>
           </div>
           ${details}
@@ -85,13 +90,21 @@ function render() {
 
   app.innerHTML = `
     <main>
+      <div class="titlebar" data-drag-region>
+        <div class="app-mark" data-drag-region><span></span>Agent Browser Monitor</div>
+        <div class="window-controls">
+          <button data-window="minimize" aria-label="Minimize">−</button>
+          <button data-window="maximize" aria-label="Maximize">□</button>
+          <button class="window-close" data-window="close" aria-label="Close">×</button>
+        </div>
+      </div>
       <header>
         <div><p class="eyebrow">LOCAL PROCESS CONTROL</p><h1>Agent Browser Monitor</h1><p class="subtitle">Only detects agent-browser and its temporary headless Chrome profiles.</p></div>
         <button id="refresh" class="refresh" ${refreshing ? "disabled" : ""}>${refreshing ? "Refreshing…" : "Refresh"}</button>
       </header>
       <section class="summary">
         <div><span>Host CPU</span><strong>${snapshot.platform === "linux" ? `${num(snapshot.cpu_busy_percent, 1)}%` : "—"}</strong></div>
-        <div><span>Available RAM</span><strong>${snapshot.platform === "linux" ? `${num(snapshot.memory_available_mib)} MiB` : "—"}</strong></div>
+        <div><span>Available RAM</span><strong>${snapshot.platform === "linux" ? memoryGb(snapshot.memory_available_mib) : "—"}</strong></div>
         <div><span>Swap used</span><strong>${snapshot.platform === "linux" ? `${num(snapshot.swap_used_mib)} MiB` : "—"}</strong></div>
         <div><span>Agent / Chrome</span><strong>${snapshot.agent_process_count} / ${snapshot.chrome_process_count}</strong></div>
       </section>
@@ -101,6 +114,14 @@ function render() {
     </main>`;
 
   document.querySelector("#refresh")?.addEventListener("click", () => void refresh());
+  document.querySelectorAll<HTMLButtonElement>("[data-window]").forEach((button) => button.addEventListener("click", () => {
+    const window = getCurrentWindow();
+    const action = button.dataset.window;
+    if (action === "minimize") void window.minimize();
+    if (action === "maximize") void window.toggleMaximize();
+    if (action === "close") void window.close();
+  }));
+  document.querySelector<HTMLElement>("[data-drag-region]")?.addEventListener("mousedown", () => void getCurrentWindow().startDragging());
   document.querySelectorAll<HTMLButtonElement>("[data-expand]").forEach((button) => button.addEventListener("click", () => {
     const id = button.dataset.expand!;
     expanded.has(id) ? expanded.delete(id) : expanded.add(id);

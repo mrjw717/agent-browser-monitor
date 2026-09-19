@@ -34,6 +34,7 @@ struct Session {
     processes: Vec<ProcessInfo>,
     cpu_percent: f64,
     memory_mib: f64,
+    active_seconds: u64,
 }
 #[derive(Serialize)]
 struct Snapshot {
@@ -129,6 +130,10 @@ fn make_session(
     };
     let cpu_percent = processes.iter().map(|p| p.cpu_percent).sum();
     let memory_mib = processes.iter().map(|p| p.memory_mib).sum();
+    let active_seconds = all
+        .get(&root)
+        .map(|process| process.elapsed_seconds)
+        .unwrap_or_else(|| processes.iter().map(|process| process.elapsed_seconds).min().unwrap_or(0));
     Session {
         id,
         kind: kind.into(),
@@ -138,6 +143,7 @@ fn make_session(
         processes,
         cpu_percent,
         memory_mib,
+        active_seconds,
     }
 }
 fn sessions(all: &HashMap<i32, ProcessInfo>) -> Vec<Session> {
@@ -312,8 +318,8 @@ fn process_map(_: &AppState) -> HashMap<i32, ProcessInfo> {
                 ProcessInfo {
                     pid,
                     ppid,
-                    name: f.get(6)?.into(),
-                    state: f.get(2)?.into(),
+                    name: (*f.get(6)?).to_string(),
+                    state: (*f.get(2)?).to_string(),
                     elapsed_seconds: age,
                     memory_mib: f.get(4)?.parse::<f64>().ok()? / 1024.,
                     cpu_percent: f.get(5)?.parse().unwrap_or(0.),
@@ -353,7 +359,8 @@ fn process_map(_: &AppState) -> HashMap<i32, ProcessInfo> {
             let cmd = v
                 .get("CommandLine")
                 .and_then(|x| x.as_str())
-                .unwrap_or(&name);
+                .map(str::to_owned)
+                .unwrap_or_else(|| name.clone());
             Some((
                 pid,
                 ProcessInfo {
@@ -368,7 +375,7 @@ fn process_map(_: &AppState) -> HashMap<i32, ProcessInfo> {
                         .unwrap_or(0.)
                         / 1048576.,
                     elapsed_seconds: 0,
-                    command: redact(cmd),
+                    command: redact(&cmd),
                     marker: 0,
                 },
             ))
@@ -430,7 +437,7 @@ fn system_stats(state: &AppState) -> (f64, u64, u64) {
 }
 #[cfg(not(target_os = "linux"))]
 fn system_stats(_: &AppState) -> (f64, u64, u64) {
-    (0, 0, 0)
+    (0.0, 0, 0)
 }
 
 #[tauri::command]
