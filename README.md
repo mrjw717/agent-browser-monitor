@@ -6,8 +6,6 @@ A free, local-first desktop utility for finding and stopping stale `agent-browse
 
 ![Agent Browser Monitor showing four live local automation sessions](assets/live-session-monitor.png)
 
-![Agent Browser Monitor showing several live disposable browser sessions](assets/live-session-monitor.png)
-
 ## Why this exists
 
 Browser automation is brilliant until a completed preview check, Playwright run, or agent session leaves headless Chrome processes behind. Those processes can quietly keep using CPU, RAM, swap, and battery long after the task appears done.
