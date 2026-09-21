@@ -37,11 +37,14 @@ type Snapshot = {
   platform: string;
   captured_at: string;
 };
+type SortKey = "active_seconds" | "processes" | "memory_mib" | "cpu_percent";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 let snapshot: Snapshot | null = null;
 let expanded = new Set<string>();
 let refreshing = false;
+let sortBy: SortKey = "active_seconds";
+let sortDescending = true;
 
 const formatAge = (seconds: number) => {
   const h = Math.floor(seconds / 3600);
@@ -58,8 +61,18 @@ function render() {
     return;
   }
 
-  const sessionRows = snapshot.sessions.length
-    ? snapshot.sessions.map((session) => {
+  const sortedSessions = [...snapshot.sessions].sort((a, b) => {
+    const result = sortBy === "processes"
+      ? b.processes.length - a.processes.length
+      : sortBy === "memory_mib"
+        ? b.memory_mib - a.memory_mib
+        : sortBy === "cpu_percent"
+          ? b.cpu_percent - a.cpu_percent
+          : b.active_seconds - a.active_seconds;
+    return sortDescending ? result : -result;
+  });
+  const sessionRows = sortedSessions.length
+    ? sortedSessions.map((session) => {
       const open = expanded.has(session.id);
       const kind = session.kind;
       const profile = session.profile ? session.profile.replace("/tmp/agent-browser-chrome-", "profile ") : "unattributed agent process";
@@ -109,12 +122,34 @@ function render() {
         <div><span>Swap used</span><strong>${snapshot.platform === "linux" ? `${num(snapshot.swap_used_mib)} MiB` : "—"}</strong></div>
         <div><span>Agent / Chrome</span><strong>${snapshot.agent_process_count} / ${snapshot.chrome_process_count}</strong></div>
       </section>
-      <div class="list-heading"><span>SESSIONS</span><span>Updated ${new Date(snapshot.captured_at).toLocaleTimeString()}</span></div>
+      <div class="list-heading">
+        <span>SESSIONS</span>
+        <div class="list-controls">
+          <span>Updated ${new Date(snapshot.captured_at).toLocaleTimeString()}</span>
+        </div>
+      </div>
+      <div class="session-column-head" aria-label="Sortable session columns">
+        <span></span><span>Session</span>
+        ${(["cpu_percent", "memory_mib", "processes", "active_seconds"] as SortKey[]).map((key) => {
+          const label = key === "active_seconds" ? "Active" : key === "processes" ? "Processes" : key === "memory_mib" ? "RAM" : "CPU";
+          const active = sortBy === key;
+          return `<button class="sort-button${active ? " active" : ""}" data-sort="${key}" aria-label="Sort by ${label}" aria-pressed="${active}">${label}${active ? (sortDescending ? " ↓" : " ↑") : ""}</button>`;
+        }).join("")}
+      </div>
       <div class="sessions">${sessionRows}</div>
       <footer>Termination is limited to the selected, verified agent-browser or Playwright process tree. Unix uses TERM then KILL; Windows uses taskkill for that verified tree.</footer>
     </main>`;
 
   document.querySelector("#refresh")?.addEventListener("click", () => void refresh());
+  document.querySelectorAll<HTMLButtonElement>("[data-sort]").forEach((button) => button.addEventListener("click", () => {
+    const next = button.dataset.sort as SortKey;
+    if (sortBy === next) sortDescending = !sortDescending;
+    else {
+      sortBy = next;
+      sortDescending = true;
+    }
+    render();
+  }));
   document.querySelectorAll<HTMLButtonElement>("[data-window]").forEach((button) => button.addEventListener("click", () => {
     const window = getCurrentWindow();
     const action = button.dataset.window;
